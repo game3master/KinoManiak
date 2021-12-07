@@ -1,0 +1,62 @@
+import axios from 'axios';
+axios.defaults.baseURL = 'http://localhost:7777/';
+
+export const getAllFilms = () => {
+    return axios.get('films')
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => {
+            return error;
+        });
+}
+
+export const getFilmById = (id) => {
+    return axios.get('film/' + id)
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => {
+            return error;
+        });
+}
+
+// export const getFilmsByDate = (date) => {
+//     return axios.get("/date/" + date)
+//         .then((response) => {
+//             return response.data;
+//         })
+//         .catch((error) => {
+//             return error;
+//         });
+// }
+
+export const addFilm = (body) => {
+    return axios.post("/film", body)
+        .then((response) => {
+            return response;
+        })
+        .catch((error) => {
+            return error;
+        });
+}
+
+export const editFilm = (id, body) => {
+    return axios.put("/film/" + id, body)
+        .then((response) => {
+            return response;
+        })
+        .catch((error) => {
+            return error;
+        });
+}
+
+export const deleteFilm = (id) => {
+    return axios.delete("/film/" + id)
+        .then(response => {
+            return response;
+        })
+        .catch((error) => {
+            return error;
+        });
+}

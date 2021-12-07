@@ -13,16 +13,18 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import AddRoom from './other/AddRoom';
 import Rooms from './components/Room/Rooms';
 import RoomClass from "./class/RoomClass";
+import * as FilmsApi from './api/FilmsApi';
+
 
 class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
             filmList: [
-             new FilmClass(parseInt(nextId().slice(2)),  "Venom",  240 ),
-             new FilmClass( parseInt(nextId().slice(2)),  "Atak Ludzi Grzybów",  90 ),
-              new FilmClass( parseInt(nextId().slice(2)),  "Hannibal",  131 ),
-              new FilmClass( parseInt(nextId().slice(2)),  "Smakosz",  90 ),
+            //  new FilmClass(parseInt(nextId().slice(2)),  "Venom",  240 ),
+            //  new FilmClass( parseInt(nextId().slice(2)),  "Atak Ludzi Grzybów",  90 ),
+            //   new FilmClass( parseInt(nextId().slice(2)),  "Hannibal",  131 ),
+            //   new FilmClass( parseInt(nextId().slice(2)),  "Smakosz",  90 ),
             ],
             roomList: [
               new RoomClass(parseInt(nextId().slice(2)),  30,  24 ),
@@ -33,9 +35,18 @@ class App extends Component {
           };
         }
         
-        createNotification(message) {
-            NotificationManager.success('Success', message);
+        createNotification(message, type) {
+          switch (type) {
+            case "SUCCESS":
+              NotificationManager.success('Success', message);
+              break;
+            case "ERROR":
+              NotificationManager.error('Error', message);
+              break;
+            default:
+              break;
           }
+        }
 
           addZero(number) {
             return number < 10 ? '0' + number : number;
@@ -56,33 +67,79 @@ class App extends Component {
             });
           }
           
+          // addFilm = (s) => {
+          //   this.setState(state => {
+          //     var films = state.filmList;
+          //     var id = parseInt(nextId().slice(2))
+          //     let newFilm = new FilmClass(id, s.title, s.duration);
+          //     films.push(newFilm);
+          //     return { filmList: films }
+          //   });
+          // }
           addFilm = (s) => {
-            this.setState(state => {
-              var films = state.filmList;
-              var id = parseInt(nextId().slice(2))
-              let newFilm = new FilmClass(id, s.title, s.duration);
-              films.push(newFilm);
-              return { filmList: films }
-            });
+            //var date = s.date === undefined ? null : s.date;
+           // var time = s.time === undefined ? null : s.time;
+            var status = "";
+            //var category = s.category.replace(/ +/g, "");
+            //if (category.toUpperCase() === "TODO") {
+              //status = false;
+              //category = "To do";
+            //}
+            //else
+              //category = s.category
+        
+            var body = {
+              title: s.title,
+              duration: s.duration
+              
+            }
+        
+           //var message = this.validateAddForm(body);
+            //if (message.length === 0) {
+              FilmsApi.addFilm(body)
+                .then(response => {
+                  if (response.status === 201) {
+                    this.createNotification("Note was added succesfully", "SUCCESS");
+                    this.updateNotesList("PUSH", body);
+                  }
+                });
+            //} else {
+              //for (let i = 0; i < message.length; i++)
+              //  this.createNotification(message[i], "ERROR");
+            //}
+          }
+          editFilm = (film, s) => {
+
+            var body = {
+              //id: id,
+              title: s.title,
+              duration: s.duration
+              
+            }
+        
+            var messages = this.validateEditForm(body);
+            if (messages.length === 0) {
+              FilmsApi.editFilm(film.filmId, body)
+                .then(response => {
+                  if (response.status === 200) {
+                    this.createNotification('Note was edited successfully', "SUCCESS");
+                    this.updateNotesList("PUT", body);
+                  }
+                });
+            } else {
+              for (let i = 0; i < messages.length; i++)
+                this.createNotification(messages[i], "ERROR");
+            }
           }
         
-          editFilm = (index, s) => {
-            this.setState(state => {
-              var films = state.filmList;
-              films[index].title = s.editTitle;
-              films[index].duration = s.editDuration;
-        
-              return { filmList: films }
-            });
-            this.createNotification('Film was edited successfully');
-          }
-        
-          deleteFilm = (index) => {
-            this.setState(state => {
-              var films = state.filmList;
-              films.splice(index, 1);
-              return { filmList: films }
-            });
+          deleteFilm = (id) => {
+            FilmsApi.deleteFilm(id)
+              .then(response => {
+                if (response.status === 204) {
+                  this.createNotification('Note was removed succesfully', "SUCCESS");
+                  this.updateFilmList("DELETE", id)
+                }
+              });
           }
 
           addZero(number) {
